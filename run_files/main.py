@@ -22,18 +22,12 @@ import chromedriver_autoinstaller
 import time
 import os
 from dotenv import load_dotenv
-import csv
-from io import TextIOWrapper
-from zipfile import ZipFile
 from datetime import date
 from datetime import datetime
 import sys
 import gspread
 import pandas as pd
-from df2gspread import df2gspread as d2g
 from googleapiclient.discovery import build
-from google.oauth2 import service_account
-import re
 import string
 from oauth2client.service_account import ServiceAccountCredentials
 
