@@ -26,6 +26,7 @@ from datetime import date
 from datetime import datetime
 import sys
 import gspread
+import warnings
 import pandas as pd
 from googleapiclient.discovery import build
 import string
@@ -100,6 +101,8 @@ action = ActionChains(driver)
 
 sys_cls_clear = "Cls"
 
+warnings.simplefilter("ignore")
+
 # --------------------------------------------------------------------------
 # Date and time format
 # --------------------------------------------------------------------------
@@ -116,8 +119,8 @@ day = date.today().strftime("%A")
 def scrape():
     try:
         # Log in
-        print("Executing Juniper Scrape ... ")
-        print("    Logging into Juniper ... ")
+        print("Executing Juniper Entitlement Check ... ")
+        print("\nLogging into Juniper ... ")
         driver.get("https://entitlementsearch.juniper.net/")
         time.sleep(1.5)
         email = wait.until(
@@ -143,7 +146,13 @@ def scrape():
             del hostname[:2]
             values = worksheet.col_values(serialno.col)
             del values[:2]
-            values = [j for j in values if j]
+            # vvv doing this because duplicates get removed later so each "missingsn" needs to be different
+            increment = 1
+            for n in range(len(values)):
+                if not values[n]:
+                    values[n] = "MissingSN" + str(increment)
+                    increment += 1
+            # values = [j for j in values if j]
             devicename = []
             for i in range(len(values)):
                 devicename.append(hostname[i])
@@ -154,7 +163,11 @@ def scrape():
             textbox.send_keys(Keys.DELETE)
             for elem in values:
                 textbox.send_keys(elem + "\n")
-            print(values)
+            print(
+                "\nEntering serial numbers of "
+                + worksheet.title
+                + " from mastersheet ..."
+            )
             submit = wait.until(
                 EC.element_to_be_clickable(
                     (By.XPATH, '//*[@id="root"]/div/main/div/div[3]/button')
@@ -182,7 +195,7 @@ def scrape():
                             )
                         )
                     )
-                    print("Download Button Found")
+                    print("\nDownloading ...")
                     try:
                         os.remove(FILE_PATH)
                     except:
@@ -199,7 +212,9 @@ def scrape():
                     )
                     print(df)
                     # df = df.fillna("N/A")
-
+                    df["Serial No."] = df["Serial No."].str.replace(
+                        "MissingSN.+", "Missing S/N", regex=True
+                    )
                     df["Warranty Expiry Date"] = pd.to_datetime(
                         df["Warranty Expiry Date"], format="%m-%d-%Y", errors="coerce"
                     )
@@ -218,7 +233,7 @@ def scrape():
 
                     df.insert(0, "Device Name", devicename)
                     df = df.fillna("N/A")
-                    print("Updating " + worksheet.title + " worksheet ...")
+                    print("\nUpdating " + worksheet.title + " Google sheet ...")
                     values = [
                         ["Last updated: " + today, "", "", "", "", "", "", "", ""]
                     ]
@@ -236,6 +251,7 @@ def scrape():
                         )
                     )
                     back.click()
+                    print("\nDone with " + worksheet.title + "!")
                     break
                 except Exception as e:
                     print(e)
