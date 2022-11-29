@@ -29,8 +29,8 @@ import gspread
 import warnings
 import pandas as pd
 from googleapiclient.discovery import build
-import string
 from oauth2client.service_account import ServiceAccountCredentials
+
 
 # --------------------------------------------------------------------------
 # Load .env file
@@ -44,6 +44,8 @@ SERVICE_ACCOUNT = os.environ.get("SERVICE_ACCOUNT")
 SPREADSHEET_ID = os.environ.get("SPREADSHEET_ID")
 MASTER_ID = os.environ.get("MASTER_ID")
 FILE_PATH = os.environ.get("FILE_PATH")
+
+
 # --------------------------------------------------------------------------
 # Create service with Google API
 # --------------------------------------------------------------------------
@@ -68,6 +70,7 @@ gc = gspread.authorize(creds)
 spreadsheet = gc.open_by_key(SPREADSHEET_ID)
 
 service = build(API_NAME, API_VERSION, credentials=creds)
+
 
 # --------------------------------------------------------------------------
 # Selenium chromedriver options
@@ -103,6 +106,7 @@ sys_cls_clear = "Cls"
 
 warnings.simplefilter("ignore")
 
+
 # --------------------------------------------------------------------------
 # Date and time format
 # --------------------------------------------------------------------------
@@ -110,9 +114,11 @@ warnings.simplefilter("ignore")
 today = datetime.now().strftime("%m/%d/%Y")
 day = date.today().strftime("%A")
 
+
 # --------------------------------------------------------------------------
 # Function:     scrape()
-# Purpose:      Log in to Mist and download the .csv file containing metrics
+# Purpose:      Log in to Juniper and download the .xlsx file containing
+#               the entitlement data. Then upload to Google Sheet
 # --------------------------------------------------------------------------
 
 
@@ -264,69 +270,6 @@ def scrape():
 
 
 # --------------------------------------------------------------------------
-# Function:     parse_and_upload()
-# Purpose:      Parses through .csv list and saves the data to a variable
-#               per site, then sends data to Google sheet through API
-# --------------------------------------------------------------------------
-
-
-def parse_and_upload():
-    pass
-
-
-# --------------------------------------------------------------------------
-# Function:     update_sheet(worksheet, range, values)
-# Purpose:      Updates cells on a worksheet
-# --------------------------------------------------------------------------
-
-
-def update_sheet(worksheet, range, values):
-    service.spreadsheets().values().update(
-        spreadsheetId=SPREADSHEET_ID,
-        valueInputOption="USER_ENTERED",
-        range=worksheet + range,
-        body=values,
-    ).execute()
-
-
-# --------------------------------------------------------------------------
-# Function:     append_sheet(worksheet, range, values)
-# Purpose:      Appends cells on a worksheet
-# --------------------------------------------------------------------------
-
-
-def append_sheet(worksheet, range, values):
-    service.spreadsheets().values().append(
-        spreadsheetId=SPREADSHEET_ID,
-        valueInputOption="USER_ENTERED",
-        range=worksheet + range,
-        body=values,
-    ).execute()
-
-
-# --------------------------------------------------------------------------
-# Function:     next_available_row(worksheet)
-# Purpose:      Finds the next row number of the given worksheet
-# --------------------------------------------------------------------------
-
-
-def next_available_row(worksheet):
-    str_list = list(filter(None, worksheet.col_values(1)))
-    return str(len(str_list) + 2)
-
-
-# --------------------------------------------------------------------------
-# Function:     n2a()
-# Purpose:      Converts a number to its corresponding column (0 = A, 26 = AA)
-# --------------------------------------------------------------------------
-
-
-def n2a(n, b=string.ascii_uppercase):
-    d, m = divmod(n, len(b))
-    return n2a(d - 1, b) + b[m] if d else b[m]
-
-
-# --------------------------------------------------------------------------
 # Function:     bye()
 # Purpose:      Closes the program
 # --------------------------------------------------------------------------
@@ -364,7 +307,6 @@ def main():
         try:
             print("Today is " + day + " " + today + "\n")
             scrape()
-            parse_and_upload()
             print("Done!\n")
             driver.quit()
         # Retry program if it fails
