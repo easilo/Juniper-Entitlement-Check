@@ -8,7 +8,10 @@
 
 # Requirements
 In order to run this code a project on cloud.google.com must be created along with a service account and service account credentials. \
-Then a *.env* file containing the following is required and must be in *run_files* directory.
+Then a *.env* file containing the following is required and must be in *run_files* directory.\
+
+Also requires a Google sheet (mastersheet) that contains device names/serial numbers, also a separate Google sheet that is the target output. \
+Both sheets must be shared with the service account's email as an editor.
 
 ## .env file
 Rename ".template.env" to ".env and fill in the following details
