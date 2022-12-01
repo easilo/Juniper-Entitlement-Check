@@ -29,7 +29,7 @@ import gspread
 import warnings
 import pandas as pd
 from googleapiclient.discovery import build
-from oauth2client.service_account import ServiceAccountCredentials
+from google.oauth2 import service_account
 
 
 # --------------------------------------------------------------------------
@@ -64,8 +64,9 @@ SCOPES = [
     "https://spreadsheets.google.com/feeds",
 ]
 
-creds = ServiceAccountCredentials.from_json_keyfile_name(SERVICE_ACCOUNT, scopes=SCOPES)
-gc = gspread.authorize(creds)
+creds = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT)
+scoped_creds = creds.with_scopes(SCOPES)
+gc = gspread.authorize(scoped_creds)
 
 spreadsheet = gc.open_by_key(SPREADSHEET_ID)
 
