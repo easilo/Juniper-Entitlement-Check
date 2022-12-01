@@ -201,7 +201,7 @@ def scrape():
                             )
                         )
                     )
-                    print("\nDownloading ...")
+                    print("\nDownloading data ...")
                     try:
                         os.remove(FILE_PATH)
                     except:
