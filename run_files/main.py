@@ -211,7 +211,10 @@ def scrape():
                     while not os.path.exists(FILE_PATH):
                         time.sleep(1)
                     df = pd.read_excel(
-                        FILE_PATH, sheet_name="ReportData", engine="openpyxl"
+                        FILE_PATH,
+                        sheet_name="ReportData",
+                        dtype={"Contract ID": str},
+                        engine="openpyxl",
                     )
                     df = df.drop(df.columns[[1]], axis=1, inplace=False)
                     df = df.drop_duplicates(
